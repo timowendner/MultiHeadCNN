@@ -45,45 +45,39 @@ class CNNBlock(nn.Module):
 
 
 class CNN(nn.Module):
-    def __init__(self, layers: list[int]) -> None:
+    def __init__(self,
+                 conv_layers: list[int],
+                 linear_layers: list[int],
+                 in_channels: int = 3,
+                 out_channels: int = 10
+                 ) -> None:
         super(CNN, self).__init__()
         last = 3
         self.conv_layers = nn.ModuleList([])
-        for i, channels in enumerate(layers):
+        for i, channels in enumerate(conv_layers):
             self.conv_layers.append(nn.Sequential(
                 CNNBlock(last, channels, kernel_size=3, padding=1),
                 ResBlock(channels, kernel_size=3, dropout=0.2),
                 ResBlock(channels, kernel_size=3, dropout=0.2),
             ))
-            if i != len(layers) - 1:
+            if i != len(conv_layers) - 1:
                 self.conv_layers.append(nn.MaxPool2d(2))
             last = channels
 
-        # self.conv_layers = nn.Sequential(
-        #     CNNBlock(3, 32, kernel_size=3, padding=0),
-        #     ResBlock(32, kernel_size=3, dropout=0.2),
-        #     ResBlock(32, kernel_size=3, dropout=0.2),
-        #     nn.MaxPool2d(2),
-        #     CNNBlock(32, 64, kernel_size=3, padding=0),
-        #     ResBlock(64, kernel_size=3, dropout=0.2),
-        #     ResBlock(64, kernel_size=3, dropout=0.2),
-        #     nn.MaxPool2d(2),
-        #     CNNBlock(64, 64, kernel_size=3, padding=1),
-        #     ResBlock(64, kernel_size=3, dropout=0.2),
-        #     ResBlock(64, kernel_size=3, dropout=0.2),
-        # )
-
         self.conv_out_size = self._get_conv_out_size()
-        self.fc_layers = nn.Sequential(
-            nn.Linear(self.conv_out_size, 512),
-            nn.ReLU(),
-            nn.Linear(512, 512),
-            nn.ReLU(),
-            nn.Linear(512, 256),
-            nn.ReLU(),
-            nn.Linear(256, 10),
-            nn.Softmax(dim=1)
+
+        self.linear_layers = nn.ModuleList([])
+        last = self.conv_out_size
+        for i, channels in enumerate(linear_layers):
+            self.linear_layers.append(
+                nn.Linear(last, channels)
+            )
+            self.linear_layers.append(nn.ReLU())
+            last = channels
+        self.linear_layers.append(
+            nn.Linear(last, out_channels)
         )
+        self.linear_layers.append(nn.Softmax(dim=1))
 
     def _get_conv_out_size(self):
         data = torch.zeros(
@@ -99,5 +93,6 @@ class CNN(nn.Module):
         for layer in self.conv_layers:
             x = layer(x)
         x = x.view(-1, self.conv_out_size)
-        x = self.fc_layers(x)
+        for layer in self.linear_layers:
+            x = layer(x)
         return x
