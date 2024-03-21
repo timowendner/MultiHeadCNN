@@ -52,7 +52,7 @@ class CNN(nn.Module):
                  out_channels: int = 10
                  ) -> None:
         super(CNN, self).__init__()
-        last = 3
+        last = in_channels
         self.conv_layers = nn.ModuleList([])
         for i, channels in enumerate(conv_layers):
             self.conv_layers.append(nn.Sequential(
@@ -64,10 +64,8 @@ class CNN(nn.Module):
                 self.conv_layers.append(nn.MaxPool2d(2))
             last = channels
 
-        self.conv_out_size = self._get_conv_out_size()
-
         self.linear_layers = nn.ModuleList([])
-        last = self.conv_out_size
+        last = self._get_conv_out_size()
         for i, channels in enumerate(linear_layers):
             self.linear_layers.append(
                 nn.Linear(last, channels)
@@ -80,19 +78,16 @@ class CNN(nn.Module):
         self.linear_layers.append(nn.Softmax(dim=1))
 
     def _get_conv_out_size(self):
-        data = torch.zeros(
-            (1, 3, 32, 32), dtype=torch.float32)
+        data = torch.zeros((1, 3, 32, 32))
         for layer in self.conv_layers:
             data = layer(data)
-        # conv_out = self.conv_layers(sample_input)
         size = int(data.view(-1).size(0))
-        print(size)
         return size
 
     def forward(self, x):
         for layer in self.conv_layers:
             x = layer(x)
-        x = x.view(-1, self.conv_out_size)
+        x = x.flatten(1)
         for layer in self.linear_layers:
             x = layer(x)
         return x
