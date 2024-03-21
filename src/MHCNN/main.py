@@ -1,13 +1,10 @@
-import numpy as np
 import torch
 from torch import nn
-# from torch.utils.data import Dataset, DataLoader
-import pickle as pkl
 
-from dataloader import get_dataloaders, ImageDataset
-from model import CNN
-from training_testing import train_network
-from utils import Result
+from .dataloader import get_dataloaders, ImageDataset
+from .model import CNN
+from .training_testing import train_network
+from .utils import Result
 
 
 def main():

@@ -1,13 +1,12 @@
 import torch
 import time
 import datetime
-import numpy as np
 from torch import nn
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 from torch.optim import Optimizer
 
-from utils import Result
+from .utils import Result
 
 
 def train_network(

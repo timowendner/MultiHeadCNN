@@ -1,8 +1,5 @@
 import torch
 from torch import nn
-import numpy as np
-from torch import sin, cos, pow, Tensor
-import torch.nn.functional as F
 
 
 class ResBlock(nn.Module):
