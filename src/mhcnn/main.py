@@ -8,7 +8,7 @@ from .training_testing import train_network
 from .utils import Result
 
 
-def run_config(config_path: str):
+def run(config_path: str):
     try:
         with open(config_path, "r") as file:
             config = toml.load(file)
