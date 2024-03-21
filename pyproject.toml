@@ -18,9 +18,9 @@ classifiers = [
 ]
 dependencies = [
     'torch',
-    'torchaudio',
+    'torchvision',
     'tqdm',
 ]
 
 [project.urls]
-Homepage = "https://github.com/timowendner/MHCNN"
+Homepage = "https://github.com/timowendner/MultiHeadCNN"
