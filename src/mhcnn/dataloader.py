@@ -21,11 +21,14 @@ def download_dataset(datapath: str):
     return trainset, testset
 
 
-def get_dataloaders(datapath: str, classes: int, device: torch.device, batch_size: int = 16):
+def get_dataloaders(
+    datapath: str, classes: int, device: torch.device,
+    batch_size: int = 16, data_on_device: bool = False
+):
     trainset, testset = download_dataset(datapath)
 
-    trainset = ImageDataset(trainset, classes, device)
-    testset = ImageDataset(testset, classes, device)
+    trainset = ImageDataset(trainset, classes, device, data_on_device)
+    testset = ImageDataset(testset, classes, device, data_on_device)
 
     trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True)
     testloader = DataLoader(testset, batch_size=batch_size, shuffle=True)
@@ -34,10 +37,16 @@ def get_dataloaders(datapath: str, classes: int, device: torch.device, batch_siz
 
 
 class ImageDataset(Dataset):
-    def __init__(self, dataset: Dataset, classes: int, device: torch.device) -> None:
+    def __init__(
+        self, dataset: Dataset, classes: int, device: torch.device,
+        data_on_device: bool = False
+    ) -> None:
         self.dataset = []
         for image, label in dataset:
             label = torch.eye(classes)[label]
+            if data_on_device:
+                label = label.to(device)
+                image = image.to(device)
             self.dataset.append((image, label))
         self.device = device
 

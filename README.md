@@ -9,20 +9,35 @@ This package can be installed using:
 Then we can import it in and run it as following:
 ```py
 import mhcnn
+mhcnn.run('path/to/config.toml')
+```
 
+## Advanced Functionality
+```py
+# define the variables
 datapath = '/path/to/folder'
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 classes = 10
 batch_size = 16
 lr = 0.0001
+in_channels = 3
 num_epochs = 100
-layers = [32, 64, 64, 64]
+conv_layers = [128, 256, 256, 256, 256]
+linear_layers = [256, 256, 128]
+
+# load the dataset
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 trainloader, testloader = mhcnn.get_dataloaders(
     datapath, classes=classes,
     device=device, batch_size=batch_size
 )
 
-model = mhcnn.CNN(layers)
+# train the model
+model = mhcnn.CNN(
+    conv_layers, 
+    linear_layers, 
+    in_channels=in_channels, 
+    out_channels=classes
+)
 model.to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 criterion = nn.CrossEntropyLoss()

@@ -1,9 +1,10 @@
 datapath = '/Users/timowendner/Programming/MultiHeadCNN/data'
-classes = 10        # number of classes to predict
-in_channels = 3     # number of channels in the image (3 for rgb)
-lr = 0.0001         # learning rate
-batch_size = 16     # batch size
-num_epochs = 100    # number of epochs to train
+classes = 10            # number of classes to predict
+in_channels = 3         # number of channels in the image (3 for rgb)
+lr = 0.0001             # learning rate
+batch_size = 16         # batch size
+num_epochs = 100        # number of epochs to train
+data_on_device = false  # specifies if the whole dataset should be on the device
 
 # convolutional layers
 # a layer consists of a simple convolution that changes the channels,

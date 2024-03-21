@@ -20,7 +20,8 @@ def run(config_path: str):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     trainloader, testloader = get_dataloaders(
         config['datapath'], classes=config['classes'],
-        device=device, batch_size=config['batch_size']
+        device=device, batch_size=config['batch_size'],
+        data_on_device=config['data_on_device']
     )
 
     model = CNN(
