@@ -7,6 +7,8 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 from torch.optim import Optimizer
 
+from utils import Result
+
 
 def train_network(
     model: nn.Module,
@@ -14,6 +16,7 @@ def train_network(
     criterion: nn.Module,
     train_loader: DataLoader,
     test_loader: DataLoader,
+    result: Result,
     num_epoch: int = 100,
 ) -> tuple[nn.Module, Optimizer]:
 
@@ -39,7 +42,7 @@ def train_network(
 
         lr = optimizer.param_groups[0]['lr']
         error = test_network(
-            model, test_loader, desc='      Testing Network'
+            model, test_loader, result, desc='      Testing Network'
         )
         print(f'      current accuracy: {error*100:.2f}%, lr: {lr}\n')
     return model, optimizer
@@ -48,20 +51,15 @@ def train_network(
 def test_network(
     model: nn.Module,
     dataloader: DataLoader,
-    desc: str = None
+    result: Result,
+    desc: str = None,
 ) -> float:
-    n = 0
-    correct = 0
+    result.register_new()
     model.eval()
     for images, targets in tqdm(
         dataloader, desc=f'{desc:<25}', ncols=80
     ):
         outputs: torch.tensor = model(images)
-
-        n += images.shape[0]
-        outputs = torch.argmax(outputs, dim=1)
-        targets = torch.argmax(targets, dim=1)
-        correct += sum(outputs == targets)
-
+        result.add(outputs, targets)
     model.train()
-    return correct / n
+    return result.acc()
