@@ -11,8 +11,8 @@ class Result:
         self.runs.append({'n': 0, 'correct': 0, 'matrix': matrix})
 
     def add(self, outputs: torch.Tensor, targets: torch.Tensor):
-        outputs = torch.argmax(outputs, dim=1)
-        targets = torch.argmax(targets, dim=1)
+        outputs = torch.argmax(outputs, dim=1).cpu()
+        targets = torch.argmax(targets, dim=1).cpu()
 
         run = self.runs[-1]
         run['n'] += outputs.shape[0]
