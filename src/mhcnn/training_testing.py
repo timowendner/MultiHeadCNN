@@ -25,6 +25,7 @@ def train_network(
     model.train()
 
     for epoch in range(1, num_epoch+1):
+        result.register_train()
         time_now = datetime.datetime.now()
         time_now = time_now.strftime("%H:%M")
         desc = f'{time_now} Starting Epoch {epoch:>3}'
@@ -33,6 +34,7 @@ def train_network(
         ):
             outputs = model(images)
             loss = criterion(outputs, targets)
+            result.add(outputs, targets)
 
             optimizer.zero_grad()
             loss.backward()
@@ -40,10 +42,13 @@ def train_network(
             # torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
 
         lr = optimizer.param_groups[0]['lr']
-        error = test_network(
+        result = test_network(
             model, test_loader, result, desc='      Testing Network'
         )
-        print(f'      current accuracy: {error*100:.2f}%, lr: {lr}\n')
+        print(
+            f'      train accuracy: {result.acc_train()*100:.2f}%,',
+            f'test accuracy: {result.acc_test()*100:.2f}%, lr: {lr}\n'
+        )
     return model, optimizer
 
 
@@ -53,7 +58,7 @@ def test_network(
     result: Result,
     desc: str = None,
 ) -> float:
-    result.register_new()
+    result.register_test()
     model.eval()
     for images, targets in tqdm(
         dataloader, desc=f'{desc:<25}', ncols=80
@@ -61,4 +66,4 @@ def test_network(
         outputs: torch.tensor = model(images)
         result.add(outputs, targets)
     model.train()
-    return result.acc()
+    return result

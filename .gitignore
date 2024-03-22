@@ -7,3 +7,5 @@ data/*
 *.ipynb
 *.egg-info
 *.egg-info*
+
+*launch.json

@@ -3,7 +3,8 @@ from torch import nn
 import toml
 
 from .dataloader import get_dataloaders, ImageDataset
-from .model import CNN
+from .models.resnet import ResNet
+from .models.cnn import SimpleCNN
 from .training_testing import train_network
 from .utils import Result
 
@@ -24,11 +25,23 @@ def run(config_path: str):
         data_on_device=config['data_on_device']
     )
 
-    model = CNN(
+    if config['model_type'] == 'cnn':
+        Model_type: nn.Module = SimpleCNN
+    elif config['model_type'] == 'resnet':
+        Model_type: nn.Module = ResNet
+    else:
+        raise AssertionError('Model type has not been implemented')
+
+    model = Model_type(
         config['conv_layers'],
         config['linear_layers'],
-        in_channels=config['in_channels'],
-        out_channels=config['classes']
+        config['input_shape'],
+        classes=config['classes'],
+        kernel=config['kernel'],
+        block_size=config['block_size'],
+        block_count=config['block_count'],
+        dropout=config['dropout'],
+        padding=config['padding'],
     )
     model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=config['lr'])
@@ -42,28 +55,7 @@ def run(config_path: str):
 
 
 def main():
-    datapath = '/Users/timowendner/Programming/MultiHeadCNN/data'
-    classes = 10
-    batch_size = 16
-    lr = 0.0001
-    num_epochs = 100
-    layers = [32, 64, 64, 64]
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    trainloader, testloader = get_dataloaders(
-        datapath, classes=classes,
-        device=device, batch_size=batch_size
-    )
-
-    model = CNN(layers)
-    model.to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    criterion = nn.CrossEntropyLoss()
-    result = Result(classes)
-    model, optimizer = train_network(
-        model, optimizer, criterion,
-        trainloader, testloader, result,
-        num_epoch=num_epochs
-    )
+    run('config.toml')
 
 
 if __name__ == '__main__':
